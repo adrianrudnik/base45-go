@@ -1,4 +1,4 @@
-// Package base45 implements base45 encoding as specified by
+// Package base45 implements encoding and decoding of base 45 data by
 // https://datatracker.ietf.org/doc/draft-faltstrom-base45/
 package base45
 
@@ -157,7 +157,7 @@ func decodeTwoBytes(in []byte) (byte, error) {
 	return byte(val), nil
 }
 
-// decodeThreeBytes decodes three Base45 encoded bytes to two decoded bytes.
+// decodeThreeBytes decodes three base 45 encoded bytes to two decoded bytes.
 func decodeThreeBytes(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 4:

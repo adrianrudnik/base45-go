@@ -2,7 +2,6 @@ package base45
 
 import (
 	"bytes"
-	"math/rand"
 	"strings"
 	"testing"
 )
@@ -197,45 +196,5 @@ func TestInvalidDecodeURLSafe(t *testing.T) {
 
 	if err != ErrInvalidURLSafeEscaping {
 		t.Errorf("Expected url decode error, got %v", err)
-	}
-}
-
-func BenchmarkEncode(b *testing.B) {
-	dec := make([]byte, b.N)
-	rand.Read(dec)
-	b.ResetTimer()
-
-	Encode(dec)
-}
-
-func BenchmarkEncodeURLSafe(b *testing.B) {
-	dec := make([]byte, b.N)
-	rand.Read(dec)
-	b.ResetTimer()
-
-	EncodeURLSafe(dec)
-}
-
-func BenchmarkDecode(b *testing.B) {
-	enc := bytes.Repeat([]byte("BB8"), b.N)
-	b.ResetTimer()
-
-	_, err := Decode(enc)
-	b.StopTimer()
-
-	if err != nil {
-		b.Errorf("Unexpected error in decode benachmark \"%v\"", err)
-	}
-}
-
-func BenchmarkDecodeURLSafe(b *testing.B) {
-	enc := strings.Repeat("%2569", b.N)
-	b.ResetTimer()
-
-	_, err := DecodeURLSafe(enc)
-	b.StopTimer()
-
-	if err != nil {
-		b.Errorf("Unexpected error in decode benachmark \"%v\"", err)
 	}
 }

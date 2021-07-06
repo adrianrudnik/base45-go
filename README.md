@@ -28,20 +28,20 @@ func main() {
 	encoded := base45.Encode([]byte("Hello!!"))
 	fmt.Printf("Encoded: %s\n", encoded)
 
-	urlEncoded := base45.EncodeUrlSafe([]byte("Hello!!"))
+	urlEncoded := base45.EncodeURLSafe([]byte("Hello!!"))
 	fmt.Printf("Encoded url safe: %s\n", urlEncoded)
 
 	// Decoding data
 	decoded, err := base45.Decode([]byte("%69 VD92EX0"))
 	fmt.Printf("Decoded: %s, Error: %v\n", decoded, err)
 
-	urlDecoded, err := base45.DecodeUrlSafe("%2569%20VD92EX0")
+	urlDecoded, err := base45.DecodeURLSafe("%2569%20VD92EX0")
 	fmt.Printf("Decoded url safe: %s, Error: %v\n", urlDecoded, err)
 
 	// Error handling
 	_, err = base45.Decode([]byte("GGW"))
 
-	if err == base45.InvalidEncodedDataOverflowError {
+	if err == base45.ErrInvalidEncodedDataOverflow {
 		fmt.Printf("Encountered invalid data")
 	}
 }
@@ -53,12 +53,16 @@ The current implementation works with the following benchmark results:
 
 ```
 cpu: Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz
-BenchmarkEncode
-BenchmarkEncode-8          	138791397	         8.723 ns/op
-BenchmarkEncodeURLSafe
-BenchmarkEncodeURLSafe-8   	36777698	        32.39 ns/op
-BenchmarkDecode
-BenchmarkDecode-8          	25810398	        46.26 ns/op
-BenchmarkDecodeURLSafe
-BenchmarkDecodeURLSafe-8   	20122197	        58.18 ns/op
+BenchmarkEncodeByte1-8          53444944                22.16 ns/op            2 B/op          1 allocs/op
+BenchmarkEncodeByte8-8          14158418                84.98 ns/op           16 B/op          1 allocs/op
+BenchmarkEncodeByte64-8          2111271               573.7 ns/op           128 B/op          1 allocs/op
+BenchmarkEncodeByte512-8          270361              4493 ns/op            1024 B/op          1 allocs/op
+BenchmarkEncodeByte1024-8         134451              8881 ns/op            2048 B/op          1 allocs/op
+BenchmarkEncodeByte8192-8          17013             70445 ns/op           16384 B/op          1 allocs/op
+BenchmarkDecodeChunk1-8         28931134                40.61 ns/op            2 B/op          1 allocs/op
+BenchmarkDecodeChunk8-8          5612131               221.2 ns/op            21 B/op          5 allocs/op
+BenchmarkDecodeChunk64-8          692574              1696 ns/op             160 B/op         33 allocs/op
+BenchmarkDecodeChunk512-8          80316             15270 ns/op            1280 B/op        257 allocs/op
+BenchmarkDecodeChunk1024-8         38046             30245 ns/op            2560 B/op        513 allocs/op
+BenchmarkDecodeChunk8192-8          4898            243912 ns/op           20480 B/op       4097 allocs/op
 ```
