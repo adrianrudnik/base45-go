@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/adrianrudnik/base45-go"
 )
-<
+
 func main() {
 	// Encoding data
 	encoded := base45.Encode([]byte("Hello!!"))

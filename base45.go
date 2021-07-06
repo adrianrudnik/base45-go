@@ -24,11 +24,13 @@ import (
 	characters, compared to Base64, which encodes 3 bytes in 4
 	characters.
 
-	Chapter 4.2:
+	[1] Chapter 4.2:
 
 	The Alphanumeric mode is defined to use 45 characters as specified in
 	this alphabet.
 */
+
+// Alphabet defines the 45 useable characters for the base 45 encoding.
 var Alphabet = []byte{
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
 	'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -82,6 +84,7 @@ func encodeTwoBytes(in []byte) []byte {
 	return []byte{c, d, e}
 }
 
+// Encode encodes the given byte to base 45.
 func Encode(in []byte) []byte {
 	// Instead of analysing the possible output length, we
 	// create a byte array with the estimated capacity of two
@@ -110,8 +113,8 @@ func Encode(in []byte) []byte {
 	return out
 }
 
-// EncodeUrlSafe encodes the given bytes to a n query safe string.
-func EncodeUrlSafe(in []byte) string {
+// EncodeURLSafe encodes the given bytes to a query safe string.
+func EncodeURLSafe(in []byte) string {
 	/*
 		[1] Chapter 6:
 
@@ -128,16 +131,16 @@ func EncodeUrlSafe(in []byte) string {
 // This will be used for very short or trailing base 45 encoded data.
 func decodeTwoBytes(in []byte) (byte, error) {
 	/*
-			[1] Chapter 4:
+		[1] Chapter 4:
 
-			For encoding a single byte [a], it MUST be interpreted as a base 256
-			number, i.e. as an unsigned integer over 8 bits.  That integer MUST
-			be converted to base 45 [c d] so that a = c + (45*d).  The values c
-			and d are then looked up in Table 1 to produce a two character
-			string.
+		For encoding a single byte [a], it MUST be interpreted as a base 256
+		number, i.e. as an unsigned integer over 8 bits.  That integer MUST
+		be converted to base 45 [c d] so that a = c + (45*d).  The values c
+		and d are then looked up in Table 1 to produce a two character
+		string.
 
-		   	For decoding a Base45 encoded string the inverse operations are
-		   	performed.
+		For decoding a Base45 encoded string the inverse operations are
+		performed.
 	*/
 	c := bytes.IndexByte(Alphabet, in[0])
 	d := bytes.IndexByte(Alphabet, in[1])
@@ -146,13 +149,13 @@ func decodeTwoBytes(in []byte) (byte, error) {
 
 	// Detect possible overflow attack
 	if val > math.MaxUint8 {
-		return byte(0), InvalidEncodedDataOverflowError
+		return byte(0), ErrInvalidEncodedDataOverflow
 	}
 
 	return byte(val), nil
 }
 
-// decodeThreeBytes decodes three base 45 encoded bytes to two decoded bytes.
+// decodeThreeBytes decodes three Base45 encoded bytes to two decoded bytes.
 func decodeThreeBytes(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 4:
@@ -161,7 +164,7 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 		base 256, i.e. as an unsigned integer over 16 bits so that the number
 		n = (a*256) + b.
 
-		This number n is converted to base 45 [c, d, e] so that n = c +
+		This number n is converted to Base45 [c, d, e] so that n = c +
 		(d*45) + (e*45*45).  Note the order of c, d and e which are chosen so
 		that the left-most [c] is the least significant.
 
@@ -179,7 +182,7 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 
 	// Detect possible overflow attack
 	if val > math.MaxUint16 {
-		return nil, InvalidEncodedDataOverflowError
+		return nil, ErrInvalidEncodedDataOverflow
 	}
 
 	out := make([]byte, 2)
@@ -188,7 +191,7 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 	return out, nil
 }
 
-// Decode decodes the given base 45 data and returns the result.
+// Decode reads the base 45 encoded bytes and returns the decoded bytes.
 func Decode(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 6:
@@ -199,7 +202,7 @@ func Decode(in []byte) ([]byte, error) {
 	*/
 	for _, v := range in {
 		if !bytes.Contains(Alphabet, []byte{v}) {
-			return nil, InvalidEncodingCharactersError
+			return nil, ErrInvalidEncodingCharacters
 		}
 	}
 
@@ -217,7 +220,7 @@ func Decode(in []byte) ([]byte, error) {
 		performed.
 	*/
 	if len(in)%3 != 0 && (len(in)+1)%3 != 0 {
-		return nil, InvalidLengthError
+		return nil, ErrInvalidLength
 	}
 
 	// Instead of analysing the possible output length, we allocate
@@ -256,7 +259,8 @@ func Decode(in []byte) ([]byte, error) {
 	return out, nil
 }
 
-func DecodeUrlSafe(in string) ([]byte, error) {
+// DecodeURLSafe reads the given url encoded base 45 encoded data and returns the decoded bytes.
+func DecodeURLSafe(in string) ([]byte, error) {
 	/*
 		[1] Chapter 6:
 
@@ -267,7 +271,7 @@ func DecodeUrlSafe(in string) ([]byte, error) {
 	enc, err := url.QueryUnescape(in)
 
 	if err != nil {
-		return nil, InvalidUrlSafeEscapingError
+		return nil, ErrInvalidURLSafeEscaping
 	}
 
 	dec, err := Decode([]byte(enc))

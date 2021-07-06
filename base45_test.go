@@ -86,16 +86,16 @@ func TestValidDecodeWithDraftExamples(t *testing.T) {
 func TestInvalidInputLengthDecode(t *testing.T) {
 	_, err := Decode([]byte("ABCD"))
 
-	if err != InvalidLengthError {
-		t.Errorf("Expected InvalidLengthError, got \"%s\"", err)
+	if err != ErrInvalidLength {
+		t.Errorf("Expected ErrInvalidLength, got \"%s\"", err)
 	}
 }
 
 func TestInvalidEncodedInputAlphabet(t *testing.T) {
 	_, err := Decode([]byte("aa"))
 
-	if err != InvalidEncodingCharactersError {
-		t.Errorf("Expected InvalidEncodingCharactersError, got \"%s\"", err)
+	if err != ErrInvalidEncodingCharacters {
+		t.Errorf("Expected ErrInvalidEncodingCharacters, got \"%s\"", err)
 	}
 }
 
@@ -122,13 +122,13 @@ func TestInvalidOverflow(t *testing.T) {
 
 	_, err = Decode([]byte("GGW"))
 
-	if err != InvalidEncodedDataOverflowError {
-		t.Errorf("Expected InvalidEncodedDataOverflowError, got \"%s\"", err)
+	if err != ErrInvalidEncodedDataOverflow {
+		t.Errorf("Expected ErrInvalidEncodedDataOverflow, got \"%s\"", err)
 	}
 }
 
 func TestEncodeUrlSafe(t *testing.T) {
-	got := EncodeUrlSafe([]byte("Hello!!"))
+	got := EncodeURLSafe([]byte("Hello!!"))
 
 	expected := "%2569%20VD92EX0"
 	if !strings.EqualFold(got, expected) {
@@ -137,7 +137,7 @@ func TestEncodeUrlSafe(t *testing.T) {
 }
 
 func TestDecodeUrlSafe(t *testing.T) {
-	got, err := DecodeUrlSafe("%2569%20VD92EX0")
+	got, err := DecodeURLSafe("%2569%20VD92EX0")
 
 	if err != nil {
 		t.Errorf("Expected url decoded data, got error \"%s\"", err)
