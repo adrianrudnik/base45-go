@@ -120,7 +120,15 @@ func TestInvalidOverflow(t *testing.T) {
 		t.Errorf("Expected the valid decoded value to be 0xffff")
 	}
 
+	// Test 3 byte overflows
 	_, err = Decode([]byte("GGW"))
+
+	if err != ErrInvalidEncodedDataOverflow {
+		t.Errorf("Expected ErrInvalidEncodedDataOverflow, got \"%s\"", err)
+	}
+
+	// Test 2 byte overflows
+	_, err = Decode([]byte("::"))
 
 	if err != ErrInvalidEncodedDataOverflow {
 		t.Errorf("Expected ErrInvalidEncodedDataOverflow, got \"%s\"", err)
@@ -181,6 +189,14 @@ func TestEmptyDecodeURLSafe(t *testing.T) {
 
 	if err != ErrEmptyInput {
 		t.Errorf("Expected error on decode of empty value, got \"%v\"", err)
+	}
+}
+
+func TestInvalidDecodeURLSafe(t *testing.T) {
+	_, err := DecodeURLSafe("%20%")
+
+	if err != ErrInvalidURLSafeEscaping {
+		t.Errorf("Expected url decode error, got %v", err)
 	}
 }
 
