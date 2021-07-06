@@ -1,4 +1,4 @@
-name: badmouth
+name: lint and test
 
 on:
   push:
@@ -15,3 +15,18 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
+
+  test:
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - if: success()
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - uses: actions/checkout@v2
+      - run: go test -v -covermode=count
