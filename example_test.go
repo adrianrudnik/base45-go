@@ -4,22 +4,22 @@ import "fmt"
 
 func ExampleEncode() {
 	encoded := Encode([]byte("Hello!!"))
-	fmt.Printf("Encoded: %s\n", encoded)
+	fmt.Printf("Encoded: %s", encoded)
 }
 
 func ExampleEncodeURLSafe() {
 	encoded := EncodeURLSafe([]byte("Hello!!"))
-	fmt.Printf("Encoded url safe: %s\n", encoded)
+	fmt.Printf("Encoded url safe: %s", encoded)
 }
 
 func ExampleDecode() {
-	decoded, err := Decode([]byte("%69 VD92EX0"))
-	fmt.Printf("Decoded: %s, Error: %v\n", decoded, err)
+	decoded, _ := Decode([]byte("%69 VD92EX0"))
+	fmt.Printf("Decoded: %s", decoded)
 }
 
 func ExampleDecodeURLSafe() {
-	decoded, err := DecodeURLSafe("%2569%20VD92EX0")
-	fmt.Printf("Decoded url safe: %s, Error: %v\n", decoded, err)
+	decoded, _ := DecodeURLSafe("%2569%20VD92EX0")
+	fmt.Printf("Decoded url safe: %s", decoded)
 }
 
 func ExampleDecode_errorHandling() {
