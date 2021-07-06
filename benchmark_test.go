@@ -8,7 +8,7 @@ import (
 func benchmarkEncode(len int, b *testing.B) {
 	dec := make([]byte, len)
 	rand.Read(dec)
-	//b.ResetTimer()
+	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		Encode(dec)
