@@ -85,6 +85,7 @@ func encodeTwoBytes(in []byte) []byte {
 }
 
 // Encode encodes the given byte to base 45.
+// If an empty input is given, an empty result will be returned.
 func Encode(in []byte) []byte {
 	// Instead of analysing the possible output length, we
 	// create a byte array with the estimated capacity of two
@@ -114,6 +115,7 @@ func Encode(in []byte) []byte {
 }
 
 // EncodeURLSafe encodes the given bytes to a query safe string.
+// If an empty input is given, an empty result will be returned.
 func EncodeURLSafe(in []byte) string {
 	/*
 		[1] Chapter 6:
@@ -174,6 +176,9 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 		For decoding a Base45 encoded string the inverse operations are
 		performed.
 	*/
+
+	// We skip checks if c, d, e return -1 as the exposed Decode function
+	// already does an alphabet check and only allowed entries pass through here.
 	c := bytes.IndexByte(Alphabet, in[0])
 	d := bytes.IndexByte(Alphabet, in[1])
 	e := bytes.IndexByte(Alphabet, in[2])
@@ -192,7 +197,13 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 }
 
 // Decode reads the base 45 encoded bytes and returns the decoded bytes.
+// If an empty input is given, ErrEmptyInput is returned.
 func Decode(in []byte) ([]byte, error) {
+	// Calls to this function expect an input, empty calls should not happen.
+	if len(in) == 0 {
+		return nil, ErrEmptyInput
+	}
+
 	/*
 		[1] Chapter 6:
 
@@ -260,6 +271,7 @@ func Decode(in []byte) ([]byte, error) {
 }
 
 // DecodeURLSafe reads the given url encoded base 45 encoded data and returns the decoded bytes.
+// If an empty input is given, ErrEmptyInput is returned.
 func DecodeURLSafe(in string) ([]byte, error) {
 	/*
 		[1] Chapter 6:

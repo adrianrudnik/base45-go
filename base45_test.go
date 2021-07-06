@@ -127,7 +127,24 @@ func TestInvalidOverflow(t *testing.T) {
 	}
 }
 
-func TestEncodeUrlSafe(t *testing.T) {
+func TestEmptyEncode(t *testing.T) {
+	expected := []byte("")
+	got := Encode([]byte(""))
+
+	if !bytes.Equal(got, expected) {
+		t.Errorf("Expected empty encode input to lead to %v, got %v", expected, got)
+	}
+}
+
+func TestEmptyDecode(t *testing.T) {
+	_, err := Decode([]byte{})
+
+	if err != ErrEmptyInput {
+		t.Errorf("Expected error on decode of empty value, got \"%v\"", err)
+	}
+}
+
+func TestEncodeURLSafe(t *testing.T) {
 	got := EncodeURLSafe([]byte("Hello!!"))
 
 	expected := "%2569%20VD92EX0"
@@ -136,7 +153,16 @@ func TestEncodeUrlSafe(t *testing.T) {
 	}
 }
 
-func TestDecodeUrlSafe(t *testing.T) {
+func TestEmptyEncodeURLSafe(t *testing.T) {
+	expected := []byte("")
+	got := EncodeURLSafe([]byte(""))
+
+	if !bytes.Equal([]byte(got), expected) {
+		t.Errorf("Expected empty encode input to lead to %v, got %v", expected, got)
+	}
+}
+
+func TestDecodeURLSafe(t *testing.T) {
 	got, err := DecodeURLSafe("%2569%20VD92EX0")
 
 	if err != nil {
@@ -150,6 +176,14 @@ func TestDecodeUrlSafe(t *testing.T) {
 	}
 }
 
+func TestEmptyDecodeURLSafe(t *testing.T) {
+	_, err := DecodeURLSafe("")
+
+	if err != ErrEmptyInput {
+		t.Errorf("Expected error on decode of empty value, got \"%v\"", err)
+	}
+}
+
 func BenchmarkEncode(b *testing.B) {
 	dec := make([]byte, b.N)
 	rand.Read(dec)
@@ -158,9 +192,34 @@ func BenchmarkEncode(b *testing.B) {
 	Encode(dec)
 }
 
+func BenchmarkEncodeURLSafe(b *testing.B) {
+	dec := make([]byte, b.N)
+	rand.Read(dec)
+	b.ResetTimer()
+
+	EncodeURLSafe(dec)
+}
+
 func BenchmarkDecode(b *testing.B) {
 	enc := bytes.Repeat([]byte("BB8"), b.N)
 	b.ResetTimer()
 
-	Decode(enc)
+	_, err := Decode(enc)
+	b.StopTimer()
+
+	if err != nil {
+		b.Errorf("Unexpected error in decode benachmark \"%v\"", err)
+	}
+}
+
+func BenchmarkDecodeURLSafe(b *testing.B) {
+	enc := strings.Repeat("%2569", b.N)
+	b.ResetTimer()
+
+	_, err := DecodeURLSafe(enc)
+	b.StopTimer()
+
+	if err != nil {
+		b.Errorf("Unexpected error in decode benachmark \"%v\"", err)
+	}
 }

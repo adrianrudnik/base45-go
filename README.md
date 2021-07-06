@@ -50,9 +50,13 @@ func main() {
 The current implementation works with the following benchmark results:
 
 ```
+cpu: Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz
 BenchmarkEncode
-BenchmarkEncode-8   	138837195	         8.649 ns/op
+BenchmarkEncode-8          	138791397	         8.723 ns/op
+BenchmarkEncodeURLSafe
+BenchmarkEncodeURLSafe-8   	36777698	        32.39 ns/op
 BenchmarkDecode
-BenchmarkDecode-8   	26331207	        45.38 ns/op
+BenchmarkDecode-8          	25810398	        46.26 ns/op
+BenchmarkDecodeURLSafe
+BenchmarkDecodeURLSafe-8   	20122197	        58.18 ns/op
 ```
-
