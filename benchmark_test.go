@@ -46,7 +46,7 @@ func benchmarkDecode(len int, b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		Decode(enc)
+		_, _ = Decode(enc)
 	}
 }
 
