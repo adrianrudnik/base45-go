@@ -236,7 +236,7 @@ func Decode(in []byte) ([]byte, error) {
 
 	// Instead of analysing the possible output length, we allocate
 	// enough capacity to keep the code clean and readable. In this case
-	// the expected output length will always be lower than len(in).
+	// the expected output length will always be smaller than the input length.
 	out := make([]byte, 0, len(in))
 
 	buf := make([]byte, 3)

@@ -15,27 +15,23 @@ func benchmarkEncode(len int, b *testing.B) {
 	}
 }
 
-func BenchmarkEncodeByte1(b *testing.B) {
+func BenchmarkEncode1(b *testing.B) {
 	benchmarkEncode(1, b)
 }
 
-func BenchmarkEncodeByte8(b *testing.B) {
-	benchmarkEncode(8, b)
+func BenchmarkEncode128(b *testing.B) {
+	benchmarkEncode(128, b)
 }
 
-func BenchmarkEncodeByte64(b *testing.B) {
-	benchmarkEncode(64, b)
-}
-
-func BenchmarkEncodeByte512(b *testing.B) {
+func BenchmarkEncode512(b *testing.B) {
 	benchmarkEncode(512, b)
 }
 
-func BenchmarkEncodeByte1024(b *testing.B) {
+func BenchmarkEncode1024(b *testing.B) {
 	benchmarkEncode(1024, b)
 }
 
-func BenchmarkEncodeByte8192(b *testing.B) {
+func BenchmarkEncode8192(b *testing.B) {
 	benchmarkEncode(8192, b)
 }
 
@@ -50,26 +46,22 @@ func benchmarkDecode(len int, b *testing.B) {
 	}
 }
 
-func BenchmarkDecodeChunk1(b *testing.B) {
+func BenchmarkDecode1(b *testing.B) {
 	benchmarkDecode(1, b)
 }
 
-func BenchmarkDecodeChunk8(b *testing.B) {
-	benchmarkDecode(8, b)
+func BenchmarkDecode128(b *testing.B) {
+	benchmarkDecode(128, b)
 }
 
-func BenchmarkDecodeChunk64(b *testing.B) {
-	benchmarkDecode(64, b)
-}
-
-func BenchmarkDecodeChunk512(b *testing.B) {
+func BenchmarkDecode512(b *testing.B) {
 	benchmarkDecode(512, b)
 }
 
-func BenchmarkDecodeChunk1024(b *testing.B) {
+func BenchmarkDecode1024(b *testing.B) {
 	benchmarkDecode(1024, b)
 }
 
-func BenchmarkDecodeChunk8192(b *testing.B) {
+func BenchmarkDecode8192(b *testing.B) {
 	benchmarkDecode(8192, b)
 }

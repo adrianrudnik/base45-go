@@ -49,20 +49,18 @@ func main() {
 
 ## Performance
 
-The current implementation works with the following benchmark results:
+Encoding is measured on input bytes. Decoding is measured on output bytes.
 
 ```
 cpu: Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz
-BenchmarkEncodeByte1-8          53444944                22.16 ns/op            2 B/op          1 allocs/op
-BenchmarkEncodeByte8-8          14158418                84.98 ns/op           16 B/op          1 allocs/op
-BenchmarkEncodeByte64-8          2111271               573.7 ns/op           128 B/op          1 allocs/op
-BenchmarkEncodeByte512-8          270361              4493 ns/op            1024 B/op          1 allocs/op
-BenchmarkEncodeByte1024-8         134451              8881 ns/op            2048 B/op          1 allocs/op
-BenchmarkEncodeByte8192-8          17013             70445 ns/op           16384 B/op          1 allocs/op
-BenchmarkDecodeChunk1-8         28931134                40.61 ns/op            2 B/op          1 allocs/op
-BenchmarkDecodeChunk8-8          5612131               221.2 ns/op            21 B/op          5 allocs/op
-BenchmarkDecodeChunk64-8          692574              1696 ns/op             160 B/op         33 allocs/op
-BenchmarkDecodeChunk512-8          80316             15270 ns/op            1280 B/op        257 allocs/op
-BenchmarkDecodeChunk1024-8         38046             30245 ns/op            2560 B/op        513 allocs/op
-BenchmarkDecodeChunk8192-8          4898            243912 ns/op           20480 B/op       4097 allocs/op
+BenchmarkEncode1-8              52604754                22.48 ns/op            2 B/op          1 allocs/op
+BenchmarkEncode128-8             1000000              1143 ns/op             256 B/op          1 allocs/op
+BenchmarkEncode512-8              268015              4453 ns/op            1024 B/op          1 allocs/op
+BenchmarkEncode1024-8             135018              8905 ns/op            2048 B/op          1 allocs/op
+BenchmarkEncode8192-8              16906             70784 ns/op           16384 B/op          1 allocs/op
+BenchmarkDecode1-8              28835797                40.95 ns/op            2 B/op          1 allocs/op
+BenchmarkDecode128-8              337608              3614 ns/op             320 B/op         65 allocs/op
+BenchmarkDecode512-8               80144             15233 ns/op            1280 B/op        257 allocs/op
+BenchmarkDecode1024-8              39213             30357 ns/op            2560 B/op        513 allocs/op
+BenchmarkDecode8192-8               4642            245702 ns/op           20480 B/op       4097 allocs/op
 ```
