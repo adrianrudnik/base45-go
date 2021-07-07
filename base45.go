@@ -131,38 +131,40 @@ func EncodeURLSafe(in []byte) string {
 
 // decodeTwoBytes decodes two base 45 encoded bytes to one decoded byte.
 // This will be used for very short or trailing base 45 encoded data.
-func decodeTwoBytes(in []byte) (byte, error) {
+func decodeTwoBytes(dst, src []byte) error {
 	/*
 		[1] Chapter 4:
 
 		For encoding a single byte [a], it MUST be interpreted as a base 256
 		number, i.e. as an unsigned integer over 8 bits.  That integer MUST
 		be converted to base 45 [c d] so that a = c + (45*d).  The values c
-		and d are then looked up in Table 1 to produce a two character
+		and d are then looked up src Table 1 to produce a two character
 		string.
 
 		For decoding a Base45 encoded string the inverse operations are
 		performed.
 	*/
-	c := bytes.IndexByte(Alphabet, in[0])
-	d := bytes.IndexByte(Alphabet, in[1])
+	c := bytes.IndexByte(Alphabet, src[0])
+	d := bytes.IndexByte(Alphabet, src[1])
 
 	val := c + (d * 45)
 
 	// Detect possible overflow attack
 	if val > math.MaxUint8 {
-		return byte(0), ErrInvalidEncodedDataOverflow
+		return ErrInvalidEncodedDataOverflow
 	}
 
-	return byte(val), nil
+	copy(dst, []byte{byte(val)})
+
+	return nil
 }
 
 // decodeThreeBytes decodes three base 45 encoded bytes to two decoded bytes.
-func decodeThreeBytes(in []byte) ([]byte, error) {
+func decodeThreeBytes(dst, src []byte) error {
 	/*
 		[1] Chapter 4:
 
-		For encoding two bytes [a, b] MUST be interpreted as a number n in
+		For encoding two bytes [a, b] MUST be interpreted as a number n src
 		base 256, i.e. as an unsigned integer over 16 bits so that the number
 		n = (a*256) + b.
 
@@ -170,7 +172,7 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 		(d*45) + (e*45*45).  Note the order of c, d and e which are chosen so
 		that the left-most [c] is the least significant.
 
-		The values c, d and e are then looked up in Table 1 to produce a
+		The values c, d and e are then looked up src Table 1 to produce a
 		three character string.  The process is reversed when decoding.
 
 		For decoding a Base45 encoded string the inverse operations are
@@ -179,21 +181,20 @@ func decodeThreeBytes(in []byte) ([]byte, error) {
 
 	// We skip checks if c, d, e return -1 as the exposed Decode function
 	// already does an alphabet check and only allowed entries pass through here.
-	c := bytes.IndexByte(Alphabet, in[0])
-	d := bytes.IndexByte(Alphabet, in[1])
-	e := bytes.IndexByte(Alphabet, in[2])
+	c := bytes.IndexByte(Alphabet, src[0])
+	d := bytes.IndexByte(Alphabet, src[1])
+	e := bytes.IndexByte(Alphabet, src[2])
 
 	val := c + (d * 45) + (e * 45 * 45)
 
 	// Detect possible overflow attack
 	if val > math.MaxUint16 {
-		return nil, ErrInvalidEncodedDataOverflow
+		return ErrInvalidEncodedDataOverflow
 	}
 
-	out := make([]byte, 2)
-	binary.BigEndian.PutUint16(out, uint16(val))
+	binary.BigEndian.PutUint16(dst, uint16(val))
 
-	return out, nil
+	return nil
 }
 
 // Decode reads the base 45 encoded bytes and returns the decoded bytes.
@@ -220,7 +221,7 @@ func Decode(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 4:
 
-		A byte string [a b c d ... x y z] with arbitrary content and
+		A byte string [a b c d ... written y z] with arbitrary content and
 		arbitrary length MUST be encoded as follows: From left to right pairs
 		of bytes are encoded as described above.  If the number of bytes is
 		even, then the encoded form is a string with a length which is evenly
@@ -237,37 +238,40 @@ func Decode(in []byte) ([]byte, error) {
 	// Instead of analysing the possible output length, we allocate
 	// enough capacity to keep the code clean and readable. In this case
 	// the expected output length will always be smaller than the input length.
-	out := make([]byte, 0, len(in))
+	out := make([]byte, len(in))
 
 	buf := make([]byte, 3)
 	reader := bytes.NewReader(in)
+	written := 0
 
 	for {
-		n, _ := reader.Read(buf)
+		read, _ := reader.Read(buf)
 
-		if n == 3 {
-			dec, err := decodeThreeBytes(buf)
-
-			if err != nil {
-				return nil, err
-			}
-
-			out = append(out, dec...)
-		} else if n == 2 {
-			dec, err := decodeTwoBytes(buf[0:2])
+		if read == 3 {
+			// Three bytes go in, two come out, we copy them into the output slice
+			err := decodeThreeBytes(out[written:written+2], buf)
 
 			if err != nil {
 				return nil, err
 			}
 
-			out = append(out, dec)
+			written += 2
+		} else if read == 2 {
+			// Two bytes go in, one comes out, we copy it into the output slice
+			err := decodeTwoBytes(out[written:written+1], buf[0:2])
+
+			if err != nil {
+				return nil, err
+			}
+
+			written += 1
 		} else {
-			// this happens on EOF or error, as n == 0 in both cases
+			// this happens on EOF or error, as read == 0 in both cases
 			break
 		}
 	}
 
-	return out, nil
+	return out[:written], nil
 }
 
 // DecodeURLSafe reads the given url encoded base 45 encoded data and returns the decoded bytes.

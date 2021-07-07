@@ -53,14 +53,14 @@ Encoding is measured on input bytes. Decoding is measured on output bytes.
 
 ```
 cpu: Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz
-BenchmarkEncode1-8              52604754                22.48 ns/op            2 B/op          1 allocs/op
-BenchmarkEncode128-8             1000000              1143 ns/op             256 B/op          1 allocs/op
-BenchmarkEncode512-8              268015              4453 ns/op            1024 B/op          1 allocs/op
-BenchmarkEncode1024-8             135018              8905 ns/op            2048 B/op          1 allocs/op
-BenchmarkEncode8192-8              16906             70784 ns/op           16384 B/op          1 allocs/op
-BenchmarkDecode1-8              28835797                40.95 ns/op            2 B/op          1 allocs/op
-BenchmarkDecode128-8              337608              3614 ns/op             320 B/op         65 allocs/op
-BenchmarkDecode512-8               80144             15233 ns/op            1280 B/op        257 allocs/op
-BenchmarkDecode1024-8              39213             30357 ns/op            2560 B/op        513 allocs/op
-BenchmarkDecode8192-8               4642            245702 ns/op           20480 B/op       4097 allocs/op
+BenchmarkEncode1-8              53352907                22.51 ns/op            2 B/op          1 allocs/op
+BenchmarkEncode128-8             1000000              1128 ns/op             256 B/op          1 allocs/op
+BenchmarkEncode512-8              266653              4457 ns/op            1024 B/op          1 allocs/op
+BenchmarkEncode1024-8             134896              8899 ns/op            2048 B/op          1 allocs/op
+BenchmarkEncode8192-8              16968             70802 ns/op           16384 B/op          1 allocs/op
+BenchmarkDecode1-8              28283660                42.38 ns/op            2 B/op          1 allocs/op
+BenchmarkDecode128-8              425233              2797 ns/op             192 B/op          1 allocs/op
+BenchmarkDecode512-8              102676             11959 ns/op             768 B/op          1 allocs/op
+BenchmarkDecode1024-8              49183             23954 ns/op            1536 B/op          1 allocs/op
+BenchmarkDecode8192-8               5810            194933 ns/op           12288 B/op          1 allocs/op
 ```
