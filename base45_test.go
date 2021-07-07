@@ -2,6 +2,7 @@ package base45
 
 import (
 	"bytes"
+	"math/rand"
 	"strings"
 	"testing"
 )
@@ -79,6 +80,26 @@ func TestValidDecodeWithDraftExamples(t *testing.T) {
 		if !bytes.Equal(got, entry.decoded) {
 			t.Errorf("Unexpected decoding result for \"%s\", expected %v, got %v", entry.encoded, entry.decoded, got)
 		}
+	}
+}
+
+func TestValidLargeEncodeDecode(t *testing.T) {
+	// As the draft examples are very slim, there is no chance
+	// that the full alphabet gets tested, so we process 1mb
+	// of random data to gain some confidence that no alphabet
+	// errors are present during a encode/decode cycle.
+	expected := make([]byte, 1048576)
+	rand.Read(expected)
+
+	enc := Encode(expected)
+	got, err := Decode(enc)
+
+	if err != nil {
+		t.Errorf("Failed to decode the large set with %v", err)
+	}
+
+	if !bytes.Equal(got, expected) {
+		t.Errorf("Decoded large set not equal to expected large set")
 	}
 }
 
