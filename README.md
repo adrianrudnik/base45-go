@@ -7,9 +7,9 @@ A small and simple package to encode and decode Base45 data.
 [![coverage](https://codecov.io/gh/adrianrudnik/base45-go/branch/main/graph/badge.svg?token=O4B0TOQHM0)](https://codecov.io/gh/adrianrudnik/base45-go)
 [![go report card](https://goreportcard.com/badge/github.com/adrianrudnik/base45-go)](https://goreportcard.com/report/github.com/adrianrudnik/base45-go)
 
-It implements the current [draft version 7](https://datatracker.ietf.org/doc/draft-faltstrom-base45/) with additional testing.
+It implements the current [RFC 9285](https://datatracker.ietf.org/doc/rfc9285/) with additional testing.
 
-The target is to keep a somewhat optimized version with readable code that can easily be updated once the draft is finalized.
+The target is to keep a somewhat optimized version with readable code.
 
 ## Usage
 

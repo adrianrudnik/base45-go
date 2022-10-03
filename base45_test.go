@@ -7,60 +7,126 @@ import (
 	"testing"
 )
 
-var validDraftExamples = []struct {
+var validRfcExamples = []struct {
 	decoded []byte
 	encoded []byte
 }{
 	/*
 		[1] Chapter 4.3:
 
-		Encoding example 1: The string "AB" is the byte sequence [65 66].
-		The 16 bit value is 65 * 256 + 66 = 16706. 16706 equals 11 + 45 * 11
-		+ 45 * 45 * 8 so the sequence in base 45 is [11 11 8].  By looking up
-		these values in the Table 1 we get the encoded string "BB8".
+		Encoding example 1:
+
+		The string "AB" is the byte sequence [[65 66]].  If we look at all
+		16 bits, we get 65 * 256 + 66 = 16706.  16706 equals 11 + (11 *
+		45) + (8 * 45 * 45), so the sequence in base 45 is [11 11 8].
+		Referring to Table 1, we get the encoded string "BB8".
+
+		                  +-----------+------------------+
+		                  | AB        | Initial string   |
+		                  +-----------+------------------+
+		                  | [[65 66]] | Decimal value    |
+		                  +-----------+------------------+
+		                  | [16706]   | Value in base 16 |
+		                  +-----------+------------------+
+		                  | [11 11 8] | Value in base 45 |
+		                  +-----------+------------------+
+		                  | BB8       | Encoded string   |
+		                  +-----------+------------------+
+
+		                    Table 2: Example 1 in Detail
 	*/
 	{[]byte("AB"), []byte("BB8")},
 
 	/*
 		[1] Chapter 4.3:
 
-		Encoding example 2: The string "Hello!!" as ASCII is the byte
-		sequence [72 101 108 108 111 33 33].  If we look at each 16 bit
-		value, it is [18533 27756 28449 33].  Note the 33 for the last byte.
-		When looking at the values modulo 45, we get [[38 6 9] [36 31 13] [9
-		2 14] [33 0]] where the last byte is represented by two.  By looking
-		up these values in the Table 1 we get the encoded string "%69
-		VD92EX0".
+		Encoding example 2:
+
+		The string "Hello!!" as ASCII is the byte sequence [[72 101] [108
+		108] [111 33] [33]].  If we look at this 16 bits at a time, we get
+		[18533 27756 28449 33].  Note the 33 for the last byte.  When
+		looking at the values in base 45, we get [[38 6 9] [36 31 13] [9 2
+		14] [33 0]], where the last byte is represented by two values.
+		The resulting string "%69 VD92EX0" is created by looking up these
+		values in Table 1.  It should be noted it includes a space.
+
+		 +---------------------------------------+------------------+
+		 | Hello!!                               | Initial string   |
+		 +---------------------------------------+------------------+
+		 | [[72 101] [108 108] [111 33] [33]]    | Decimal value    |
+		 +---------------------------------------+------------------+
+		 | [18533 27756 28449 33]                | Value in base 16 |
+		 +---------------------------------------+------------------+
+		 | [[38 6 9] [36 31 13] [9 2 14] [33 0]] | Value in base 45 |
+		 +---------------------------------------+------------------+
+		 | %69 VD92EX0                           | Encoded string   |
+		 +---------------------------------------+------------------+
+
+		                   Table 3: Example 2 in Detail
 	*/
 	{[]byte("Hello!!"), []byte("%69 VD92EX0")},
 
 	/*
 		[1] Chapter 4.3:
 
-		Encoding example 3: The string "base-45" as ASCII is the byte
-		sequence [98 97 115 101 45 52 53].  If we look at each 16 bit value,
-		it is [25185 29541 11572 53].  Note the 53 for the last byte.  When
-		looking at the values modulo 45, we get [[30 19 12] [21 26 14] [7 32
-		5] [8 1]] where the last byte is represented by two.  By looking up
-		these values in the Table 1 we get the encoded string "UJCLQE7W581".
+		Encoding example 3:
+
+		The string "base-45" as ASCII is the byte sequence [[98 97] [115
+		101] [45 52] [53]].  If we look at this two bytes at a time, we
+		get [25185 29541 11572 53].  Note the 53 for the last byte.  When
+		looking at the values in base 45, we get [[30 19 12] [21 26 14] [7
+		32 5] [8 1]] where the last byte is represented by two values.
+		Referring to Table 1, we get the encoded string "UJCLQE7W581".
+
+		 +----------------------------------------+------------------+
+		 | base-45                                | Initial string   |
+		 +----------------------------------------+------------------+
+		 | [[98 97] [115 101] [45 52] [53]]       | Decimal value    |
+		 +----------------------------------------+------------------+
+		 | [25185 29541 11572 53]                 | Value in base 16 |
+		 +----------------------------------------+------------------+
+		 | [[30 19 12] [21 26 14] [7 32 5] [8 1]] | Value in base 45 |
+		 +----------------------------------------+------------------+
+		 | UJCLQE7W581                            | Encoded string   |
+		 +----------------------------------------+------------------+
+
+						Table 4: Example 3 in Detail
 	*/
 	{[]byte("base-45"), []byte("UJCLQE7W581")},
 
 	/*
 		[1] Chapter 4.4:
 
-		Decoding example 1: The string "QED8WEX0" represents, when looked up
-		in Table 1, the values [26 14 13 8 32 14 33 0].  We arrange the
-		numbers in chunks of three, except for the last one which can be two,
-		and get [[26 14 13] [8 32 14] [33 0]].  In base 45 we get [26981
-		29798 33] where the bytes are [[105 101] [116 102] [33]].  If we look
-		at the ASCII values we get the string "ietf!".
+		Decoding example 1:
+
+		The string "QED8WEX0" represents, when looked up in Table 1, the
+		values [26 14 13 8 32 14 33 0].  We arrange the numbers in chunks
+		of three, except for the last one which can be two numbers, and
+		get [[26 14 13] [8 32 14] [33 0]].  In base 45, we get [26981
+		29798 33] where the bytes are [[105 101] [116 102] [33]].  If we
+		look at the ASCII values, we get the string "ietf!".
+
+		 +-------------------------------+------------------------+
+		 | QED8WEX0                      | Initial string         |
+		 +-------------------------------+------------------------+
+		 | [26 14 13 8 32 14 33 0]       | Looked up values       |
+		 +-------------------------------+------------------------+
+		 | [[26 14 13] [8 32 14] [33 0]] | Groups of three        |
+		 +-------------------------------+------------------------+
+		 | [26981 29798 33]              | Interpreted as base 45 |
+		 +-------------------------------+------------------------+
+		 | [[105 101] [116 102] [33]]    | Values in base 8       |
+		 +-------------------------------+------------------------+
+		 | ietf!                         | Decoded string         |
+		 +-------------------------------+------------------------+
+
+						Table 5: Example 4 in Detail
 	*/
 	{[]byte("ietf!"), []byte("QED8WEX0")},
 }
 
-func TestValidEncodeWithDraftExamples(t *testing.T) {
-	for _, entry := range validDraftExamples {
+func TestValidEncodeWithRfcExamples(t *testing.T) {
+	for _, entry := range validRfcExamples {
 		got := Encode(entry.decoded)
 
 		if !bytes.Equal(got, entry.encoded) {
@@ -69,8 +135,8 @@ func TestValidEncodeWithDraftExamples(t *testing.T) {
 	}
 }
 
-func TestValidDecodeWithDraftExamples(t *testing.T) {
-	for _, entry := range validDraftExamples {
+func TestValidDecodeWithRfcExamples(t *testing.T) {
+	for _, entry := range validRfcExamples {
 		got, err := Decode(entry.encoded)
 
 		if err != nil {
@@ -84,7 +150,7 @@ func TestValidDecodeWithDraftExamples(t *testing.T) {
 }
 
 func TestValidLargeEncodeDecode(t *testing.T) {
-	// As the draft examples are very slim, there is no chance
+	// As the RFC examples are very slim, there is no chance
 	// that the full alphabet gets tested, so we process 1mb
 	// of random data to gain some confidence that no alphabet
 	// errors are present during a encode/decode cycle.
@@ -123,11 +189,15 @@ func TestInvalidOverflow(t *testing.T) {
 	/*
 		[1] Chapter 6:
 
-		Even though a Base45 encoded string contains only characters from the
-		alphabet in Table 1 the following case has to be considered: The
-		string "FGW" represents 65535 (FFFF in base 16), which is a valid
-		encoding.  The string "GGW" would represent 65536 (10000 in base 16),
-		which is represented by more than 16 bit.
+		Even though a Base45-encoded string contains only characters from the
+		alphabet in Table 1, cases like the following have to be considered:
+		The string "FGW" represents 65535 (FFFF in base 16), which is a valid
+		encoding of 16 bits.  A slightly different encoded string of the same
+		length, "GGW", would represent 65536 (10000 in base 16), which is
+		represented by more than 16 bits.  Implementations MUST also reject
+		the encoded data if it contains a triplet of characters that, when
+		decoded, results in an unsigned integer that is greater than 65535
+		(FFFF in base 16).
 	*/
 
 	valid, err := Decode([]byte("FGW"))

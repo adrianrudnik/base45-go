@@ -1,5 +1,5 @@
 // Package base45 implements encoding and decoding of base 45 data by
-// https://datatracker.ietf.org/doc/draft-faltstrom-base45/
+// https://datatracker.ietf.org/doc/rfc9285/
 package base45
 
 import (
@@ -12,25 +12,25 @@ import (
 /*
 	Chapter references:
 
-	[1] https://datatracker.ietf.org/doc/draft-faltstrom-base45/
-        2021-07-01 draft-faltstrom-base45-07
+	[1] https://datatracker.ietf.org/doc/rfc9285/
+        2022-08-11 rfc9285
 */
 
 /*
 	[1] Chapter 4:
 
-	A 45-character subset of US-ASCII is used; the 45 characters usable
-	in a QR code in Alphanumeric mode.  Base45 encodes 2 bytes in 3
-	characters, compared to Base64, which encodes 3 bytes in 4
-	characters.
+    A 45-character subset of US-ASCII is used; the 45 characters usable
+    in a QR code in Alphanumeric mode (see Section 7.3.4 and Table 2 of
+    ISO18004).  Base45 encodes 2 bytes in 3 characters, compared to
+    Base64, which encodes 3 bytes in 4 characters.
 
 	[1] Chapter 4.2:
 
-	The Alphanumeric mode is defined to use 45 characters as specified in
-	this alphabet.
+    The Alphanumeric mode is defined to use 45 characters as specified in
+    this alphabet.
 */
 
-// Alphabet defines the 45 useable characters for the base 45 encoding.
+// Alphabet defines the 45 usable characters for the base 45 encoding.
 var Alphabet = []byte{
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
 	'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -56,25 +56,25 @@ func encodeSingleByte(in byte) []byte {
 	return []byte{c, d}
 }
 
-// encodeTwoBytes takes two bytes and converts it to to base 45.
+// encodeTwoBytes takes two bytes and converts it to base 45.
 func encodeTwoBytes(in []byte) []byte {
 	/*
 		[1] Chapter 4:
 
-		For encoding two bytes [a, b] MUST be interpreted as a number n in
+		For encoding, two bytes [a, b] MUST be interpreted as a number n in
 		base 256, i.e. as an unsigned integer over 16 bits so that the number
-		n = (a*256) + b.
+		n = (a * 256) + b.
 	*/
 	n := binary.BigEndian.Uint16(in)
 
 	/*
 		[1] Chapter 4:
 
-		This number n is converted to base 45 [c, d, e] so that n = c +
-		(d*45) + (e*45*45).  Note the order of c, d and e which are chosen so
-		that the left-most [c] is the least significant.
+		This number n is converted to base 45 [c, d, e] so that n = c + (d *
+		45) + (e * 45 * 45).  Note the order of c, d and e which are chosen
+		so that the left-most [c] is the least significant.
 
-		The values c, d and e are then looked up in Table 1 to produce a
+		The values c, d, and e are then looked up in Table 1 to produce a
 		three character string.  The process is reversed when decoding.
 	*/
 	c := Alphabet[n%45]
@@ -122,7 +122,8 @@ func EncodeURLSafe(in []byte) string {
 
 		It should be noted that the resulting string after encoding to Base45
 		might include non-URL-safe characters so if the URL including the
-		Base45 encoded data has to be URL safe, one has to use %-encoding.
+		Base45 encoded data has to be URL-safe, one has to use percent-
+		encoding.
 	*/
 	parts := &url.URL{Path: string(Encode(in))}
 
@@ -137,8 +138,8 @@ func decodeTwoBytes(dst, src []byte) error {
 
 		For encoding a single byte [a], it MUST be interpreted as a base 256
 		number, i.e. as an unsigned integer over 8 bits.  That integer MUST
-		be converted to base 45 [c d] so that a = c + (45*d).  The values c
-		and d are then looked up src Table 1 to produce a two character
+		be converted to base 45 [c d] so that a = c + (45 * d).  The values c
+		and d are then looked up in Table 1 to produce a two-character
 		string.
 
 		For decoding a Base45 encoded string the inverse operations are
@@ -164,15 +165,15 @@ func decodeThreeBytes(dst, src []byte) error {
 	/*
 		[1] Chapter 4:
 
-		For encoding two bytes [a, b] MUST be interpreted as a number n src
+		For encoding, two bytes [a, b] MUST be interpreted as a number n in
 		base 256, i.e. as an unsigned integer over 16 bits so that the number
-		n = (a*256) + b.
+		n = (a * 256) + b.
 
-		This number n is converted to Base45 [c, d, e] so that n = c +
-		(d*45) + (e*45*45).  Note the order of c, d and e which are chosen so
-		that the left-most [c] is the least significant.
+		This number n is converted to base 45 [c, d, e] so that n = c + (d *
+		45) + (e * 45 * 45).  Note the order of c, d and e which are chosen
+		so that the left-most [c] is the least significant.
 
-		The values c, d and e are then looked up src Table 1 to produce a
+		The values c, d, and e are then looked up in Table 1 to produce a
 		three character string.  The process is reversed when decoding.
 
 		For decoding a Base45 encoded string the inverse operations are
@@ -187,7 +188,16 @@ func decodeThreeBytes(dst, src []byte) error {
 
 	val := c + (d * 45) + (e * 45 * 45)
 
-	// Detect possible overflow attack
+	/*
+		[1] Chapter 6:
+
+		When implementing encoding and decoding it is important to be very
+		careful so that buffer overflow or similar issues do not occur.  This
+		of course includes the calculations in base 45 and lookup in the
+		table of characters (Table 1).  A decoder must also be robust
+		regarding input, including proper handling of any octet value 0-255,
+		including the NUL character (ASCII 0).
+	*/
 	if val > math.MaxUint16 {
 		return ErrInvalidEncodedDataOverflow
 	}
@@ -208,7 +218,8 @@ func Decode(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 6:
 
-		Implementations MUST reject the encoded data if it contains
+		Implementations MUST reject any input that is not a valid encoding.
+		For example, it MUST reject the input (encoded data) if it contains
 		characters outside the base alphabet (in Table 1) when interpreting
 		base-encoded data.
 	*/
@@ -221,12 +232,13 @@ func Decode(in []byte) ([]byte, error) {
 	/*
 		[1] Chapter 4:
 
-		A byte string [a b c d ... written y z] with arbitrary content and
+		A byte string [a b c d ... x y z] with arbitrary content and
 		arbitrary length MUST be encoded as follows: From left to right pairs
-		of bytes are encoded as described above.  If the number of bytes is
-		even, then the encoded form is a string with a length which is evenly
-		divisible by 3.  If the number of bytes is odd, then the last
-		(rightmost) byte is encoded on two characters as described above.
+		of bytes MUST be encoded as described above.  If the number of bytes
+		is even, then the encoded form is a string with a length that is
+		evenly divisible by 3.  If the number of bytes is odd, then the last
+		(rightmost) byte MUST be encoded on two characters as described
+		above.
 
 		For decoding a Base45 encoded string the inverse operations are
 		performed.
@@ -282,7 +294,8 @@ func DecodeURLSafe(in string) ([]byte, error) {
 
 		It should be noted that the resulting string after encoding to Base45
 		might include non-URL-safe characters so if the URL including the
-		Base45 encoded data has to be URL safe, one has to use %-encoding.
+		Base45 encoded data has to be URL-safe, one has to use percent-
+		encoding.
 	*/
 	enc, err := url.QueryUnescape(in)
 
